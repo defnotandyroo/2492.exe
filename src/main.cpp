@@ -6,7 +6,7 @@
 /////
 
 const int numStates = 3;
-int states[numStates] = {0, 30, 200};
+int arr[numStates] = {20, 35, 200};
 int currState = 0;
 int target = 0;
 
@@ -16,15 +16,15 @@ void nextState() {
     if (currState == numStates) {
         currState = 0;
     }
-    target = states[currState];
+    target = arr[currState];
 }
 
 void liftControl() {
-    double kp = 0.1;
-    double error = target - rotator.get_position();
-    double velocity = kp * error;
-    lift.move_velocity(velocity);
+    double kp = 1.8;
+    lift.move(kp * (target - rotator.get_position()/100.0));
 }
+
+
 // Chassis constructor
 ez::Drive chassis(
     // These are your drive motors, the first motor is used for sensing!
@@ -50,7 +50,6 @@ ez::Drive chassis(
  */
 
 void initialize() {
-  rotator.set_position(0);
    pros::Task liftControlTask([]{
         while (true) {
             liftControl();
@@ -228,13 +227,14 @@ void ez_template_extras() {
   if (!pros::competition::is_connected()) {
     // PID Tuner
     // - after you find values that you're happy with, you'll have to set them in auton.cpp
+      if (master.get_digital_new_press(DIGITAL_X))
+      chassis.pid_tuner_toggle();
 
     // Enable / Disable PID Tuner
     //  When enabled:
     //  * use A and Y to increment / decrement the constants
     //  * use the arrow keys to navigate the constants
-    if (master.get_digital_new_press(DIGITAL_X))
-      chassis.pid_tuner_toggle();
+
 
     // Trigger the selected autonomous routine
     if (master.get_digital(DIGITAL_B) && master.get_digital(DIGITAL_DOWN)) {
@@ -298,10 +298,14 @@ void check_and_sort_rings() {
 
 
 void opcontrol() {
+
+  rotator.set_position(0);
   // This is preference to what you like to drive on
   chassis.drive_brake_set(MOTOR_BRAKE_COAST);
 
   while (true) {
+     
+
     // Gives you some extras to make EZ-Template ezier
     ez_template_extras();
 
@@ -328,11 +332,13 @@ void opcontrol() {
       tilter.button_toggle(master.get_digital(DIGITAL_L1));
       spike.button_toggle(master.get_digital(DIGITAL_L2));
       dinomech.button_toggle(master.get_digital(DIGITAL_DOWN));
-    
-     if(master.get_digital_new_press(DIGITAL_A)){
+ 
+      if(master.get_digital_new_press(DIGITAL_A)){
         nextState();
 
       }
+   
+
 
 
 
