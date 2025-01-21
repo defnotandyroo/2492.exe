@@ -1,28 +1,10 @@
 #include "main.h"
-#include "config.hpp"
+#include "ladybrown.hpp"
+
 /////
 // For installation, upgrading, documentations, and tutorials, check out our website!
 // https://ez-robotics.github.io/EZ-Template/
 /////
-
-const int numStates = 3;
-int arr[numStates] = {20, 35, 200};
-int currState = 0;
-int target = 0;
-
-
-void nextState() {
-    currState += 1;
-    if (currState == numStates) {
-        currState = 0;
-    }
-    target = arr[currState];
-}
-
-void liftControl() {
-    double kp = 1.8;
-    lift.move(kp * (target - rotator.get_position()/100.0));
-}
 
 
 // Chassis constructor
@@ -32,8 +14,8 @@ ez::Drive chassis(
     {11, -12, 13},  // Right Chassis Ports (negative port will reverse it!)
 
     20,      // IMU Port
-    4.125,  // Wheel Diameter (Remember, 4" wheels without screw holes are actually 4.125!)
-    343);   // Wheel RPM = cartridge * (motor gear / wheel gear)
+    2.75,  // Wheel Diameter (Remember, 4" wheels without screw holes are actually 4.125!)
+    450);   // Wheel RPM = cartridge * (motor gear / wheel gear)
 
 // Are you using tracking wheels?  Comment out which ones you're using here!
 //  `2.75` is the wheel diameter
@@ -48,6 +30,7 @@ ez::Drive chassis(
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
+
 
 void initialize() {
    pros::Task liftControlTask([]{
@@ -274,25 +257,7 @@ void ez_template_extras() {
 
 
 
-void check_and_sort_rings() {
 
-        // Get objects detected by the vision sensor
-        pros::vision_object_s_t red_ring = colorsorter.get_by_sig(0, RED_RING_SIG);
-        pros::vision_object_s_t blue_ring = colorsorter.get_by_sig(0, BLUE_RING_SIG);
-
-        if (red_ring.signature == RED_RING_SIG && red_ring.width > 20) { // Adjust width for detection confidence
-            // Red ring detected, continue intaking
-            intake.move(127); // Adjust speed as needed
-        } else if (blue_ring.signature == BLUE_RING_SIG && blue_ring.width > 20) { // Adjust width for detection confidence
-            // Blue ring detected, stop intake
-            intake.move(0);
-        } else {
-            // No relevant object detected, keep motor in its last state
-            // Optionally, stop intake here if desired
-        }
-
-        pros::delay(20); // Small delay to avoid excessive CPU usage
-    }
 
 
 
@@ -300,12 +265,19 @@ void check_and_sort_rings() {
 void opcontrol() {
 
   rotator.set_position(0);
+
+
   // This is preference to what you like to drive on
   chassis.drive_brake_set(MOTOR_BRAKE_COAST);
 
-  while (true) {
-     
+    bool intakeState = false;        // Tracks whether the motor is running
+    bool intakePressed = false;     // Tracks the button press state to avoid multiple triggers
 
+    bool outakeState = false;        // Tracks whether the motor is running
+    bool outakePressed = false;     
+
+    while (true) {  
+    
     // Gives you some extras to make EZ-Template ezier
     ez_template_extras();
 
@@ -320,14 +292,10 @@ void opcontrol() {
     // Put more user control code here!
     // . . .
 
-    check_and_sort_rings(); 
-    bool intakeState = false;        // Tracks whether the motor is running
-    bool intakePressed = false;     // Tracks the button press state to avoid multiple triggers
 
-    bool outakeState = false;        // Tracks whether the motor is running
-    bool outakePressed = false;     // Tracks the button press state to avoid multiple triggers
+// Tracks the button press state to avoid multiple triggers
 
-    while (true) {
+
 
       tilter.button_toggle(master.get_digital(DIGITAL_L1));
       spike.button_toggle(master.get_digital(DIGITAL_L2));
@@ -350,48 +318,52 @@ void opcontrol() {
       
         chassis.opcontrol_tank();
         // Check if the button A is pressed
+
+
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
             if (!intakePressed) {
-                // Toggle motor state
+               
                 intakeState = !intakeState;
 
                 if (intakeState) {
-                    intake.move(127); // Start motor at 100 RPM
+                    intake.move(127); 
                 } else {
-                    intake.move(0);   // Stop the motor
+                    intake.move(0);   
                 }
 
-                intakePressed = true; // Prevent immediate re-trigger
+                intakePressed = true; 
             }
         } else {
-            intakePressed = false; // Reset buttonPressed when button is released
+            intakePressed = false; 
         }
+
         
         pros::delay(20); // Prevent CPU overuse
 
 
                 if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
             if (!outakePressed) {
-                // Toggle motor state
+                
                 outakeState = !outakeState;
 
                 if (outakeState) {
-                    intake.move(-127); // Start motor at 100 RPM
+                    intake.move(-127); 
                 }else {
-                    intake.move(0);   // Stop the motor
+                    intake.move(0);   
                 }
 
-                outakePressed = true; // Prevent immediate re-trigger
+                outakePressed = true; 
             }
         } else {
-            outakePressed = false; // Reset buttonPressed when button is released
+            outakePressed = false;
+            
         }
         
         pros::delay(20); // Prevent CPU overuse
   
 
 
-}
+
     
   }
 

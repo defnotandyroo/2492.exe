@@ -1,3 +1,9 @@
+#ifndef LADYBROWN_H
+#define LADYBROWN_H
+
+
+
+
 #include "main.h"
 #include "subsystems.hpp"
 
@@ -16,8 +22,9 @@ void nextState() {
 
 void liftControl() {
     double kp = 0.5;
-    double error = target - liftsensor.get_position();
+    double error = target - rotator.get_position();
     double velocity = kp * error;
     lift.move(velocity);
 }
 
+#endif
