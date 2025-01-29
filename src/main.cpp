@@ -1,5 +1,5 @@
 #include "main.h"
-
+ 
 /////
 // For installation, upgrading, documentations, and tutorials, check out our website!
 // https://ez-robotics.github.io/EZ-Template/
@@ -9,10 +9,10 @@
 // Chassis constructor
 ez::Drive chassis(
     // These are your drive motors, the first motor is used for sensing!
-    {-14, -15, 16},     // Left Chassis Ports (negative port will reverse it!)
-    {11, -12, 13},  // Right Chassis Ports (negative port will reverse it!)
+    {11, -12, -16},     // Left Chassis Ports (negative port will reverse it!)
+    {14, -15, 13},  // Right Chassis Ports (negative port will reverse it!)
 
-    20,      // IMU Port
+    17,      // IMU Port
     2.75,  // Wheel Diameter (Remember, 4" wheels without screw holes are actually 4.125!)
     450);   // Wheel RPM = cartridge * (motor gear / wheel gear)
 
@@ -35,6 +35,13 @@ void initialize() {
    pros::Task liftControlTask([]{
         while (true) {
             liftControl();
+            pros::delay(10);
+        }
+    });
+
+    pros::Task colorsorter([]{
+        while (true) {
+            ejectblue();
             pros::delay(10);
         }
     });
@@ -298,7 +305,7 @@ void opcontrol() {
 
       tilter.button_toggle(master.get_digital(DIGITAL_L1));
       spike.button_toggle(master.get_digital(DIGITAL_L2));
-      dinomech.button_toggle(master.get_digital(DIGITAL_DOWN));
+   
  
       if(master.get_digital_new_press(DIGITAL_A)){
         nextState();

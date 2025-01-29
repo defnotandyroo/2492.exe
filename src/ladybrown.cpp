@@ -1,9 +1,10 @@
 #include "main.h"
+#include "ladybrown.hpp"
 
 const int numStates = 3;
-int states[numStates] = {0, 300, 2000};
+int states[numStates] = {0, 36, 160};
 int currState = 0;
-int target = 0;
+double target = 0;
 
 void nextState() {
     currState += 1;
@@ -14,7 +15,7 @@ void nextState() {
 }
 
 void liftControl() {
-    double kp = 0.5;
+    double kp = 2;
     double error = target - rotator.get_position();
     double velocity = kp * error;
     lift.move(velocity);
